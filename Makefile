@@ -4,6 +4,12 @@ install:
 test:
 	pytest -q
 
+test-unit:
+	pytest tests/unit -q
+
+test-integration:
+	pytest tests/integration -q
+
 test-cov:
 	pytest --cov=app --cov-report=term-missing
 
