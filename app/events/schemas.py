@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
@@ -14,29 +14,31 @@ class EventMetadata(BaseModel):
 
 class BaseEvent(BaseModel):
     metadata: EventMetadata
-    payload: Dict[str, Any]
+    payload: dict[str, Any]
 
 
 class ImageSubmittedPayload(BaseModel):
     image_id: str
     image_path: str
-    submitted_by: Optional[str] = None
+    filename: str
+    source: str | None = None
 
 
 class InferenceCompletedPayload(BaseModel):
     image_id: str
-    labels: List[str]
-    confidence_scores: List[float]
+    objects: list[dict[str, Any]]
+    model_version: str
 
 
 class AnnotationStoredPayload(BaseModel):
     image_id: str
-    annotations: Dict[str, Any]
+    document_id: str
+    status: str
 
 
 class EmbeddingCreatedPayload(BaseModel):
     image_id: str
-    vector: List[float]
+    embedding: list[float]
     model_name: str
 
 
@@ -48,16 +50,18 @@ class QuerySubmittedPayload(BaseModel):
 
 class QueryCompletedPayload(BaseModel):
     query_id: str
-    results: List[Dict[str, Any]]
+    query_text: str | None = None
+    top_k: int | None = None
+    results: list[dict[str, Any]]
 
 
 class AnnotationCorrectedPayload(BaseModel):
     image_id: str
-    corrected_annotations: Dict[str, Any]
-    corrected_by: Optional[str] = None
+    corrections: list[dict[str, Any]]
+    reviewer: str | None = None
 
 
 class SystemErrorPayload(BaseModel):
-    failed_event_id: Optional[str] = None
-    error_message: str
-    topic: Optional[str] = None
+    failed_topic: str | None = None
+    reason: str
+
