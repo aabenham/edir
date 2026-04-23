@@ -21,3 +21,9 @@ redis-up:
 
 redis-down:
 	docker compose down
+
+run-upload:
+	python -m app.main upload data/images/cat_001.jpg
+
+run-query:
+	python -m app.main query cat --seed-images data/images/cat_001.jpg data/images/dog_001.jpg
