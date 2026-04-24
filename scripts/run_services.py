@@ -8,15 +8,15 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.config import AppConfig
-from app.main import build_application
-from app.services.document_service import DocumentService
-from app.services.embedding_service import EmbeddingService
-from app.services.inference_service import InferenceService
-from app.services.query_service import QueryService
-from app.storage.document_store import DocumentStore
-from app.storage.processed_event_store import ProcessedEventStore
-from app.storage.vector_store import VectorStore
+from app.config import AppConfig  # noqa: E402
+from app.main import build_application  # noqa: E402
+from app.services.document_service import DocumentService  # noqa: E402
+from app.services.embedding_service import EmbeddingService  # noqa: E402
+from app.services.inference_service import InferenceService  # noqa: E402
+from app.services.query_service import QueryService  # noqa: E402
+from app.storage.document_store import DocumentStore  # noqa: E402
+from app.storage.processed_event_store import ProcessedEventStore  # noqa: E402
+from app.storage.vector_store import VectorStore  # noqa: E402
 
 
 def run_redis_services(config: AppConfig) -> None:
@@ -118,4 +118,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
