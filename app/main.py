@@ -5,7 +5,12 @@ from app.broker.base import BaseBroker
 from app.broker.in_memory_broker import InMemoryBroker
 from app.config import AppConfig
 from app.events.factory import create_event
-from app.events.topics import QUERY_COMPLETED, QUERY_SUBMITTED
+from app.events.topics import (
+    IMAGE_QUERY_COMPLETED,
+    IMAGE_QUERY_SUBMITTED,
+    QUERY_COMPLETED,
+    QUERY_SUBMITTED,
+)
 from app.services.document_service import DocumentService
 from app.services.embedding_service import EmbeddingService
 from app.services.image_service import ImageService
@@ -57,6 +62,27 @@ class Application:
         ).model_dump(mode="json")
 
         self.broker.publish(QUERY_SUBMITTED, query_event)
+        return responses[-1] if responses else {}
+
+    def submit_image_query(self, image_id: str, top_k: int = 3, source: str = "cli") -> dict:
+        responses: list[dict] = []
+
+        def capture_response(event: dict) -> None:
+            responses.append(event)
+
+        self.broker.subscribe(IMAGE_QUERY_COMPLETED, capture_response)
+
+        query_event = create_event(
+            IMAGE_QUERY_SUBMITTED,
+            {
+                "query_id": f"imgqry_{uuid4().hex[:8]}",
+                "image_id": image_id,
+                "top_k": top_k,
+            },
+            source=source,
+        ).model_dump(mode="json")
+
+        self.broker.publish(IMAGE_QUERY_SUBMITTED, query_event)
         return responses[-1] if responses else {}
 
     def close(self) -> None:

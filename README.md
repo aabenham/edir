@@ -168,6 +168,12 @@ Run a query:
 python3 -m app.cli.commands query "cat" --top-k 3
 ```
 
+Run an image-to-image query:
+
+```bash
+python3 -m app.cli.commands query-image data/images/000000023272.jpg --top-k 3
+```
+
 ## In-Memory Demo
 
 The in-memory broker is useful for quick local verification and tests.
@@ -246,12 +252,14 @@ cd /Users/anasbenhamida/Desktop/EC530/edir
 source .venv/bin/activate
 APP_BROKER=redis python3 -m app.cli.commands upload data/images/000000023272.jpg
 APP_BROKER=redis python3 -m app.cli.commands query "cat" --top-k 3
+APP_BROKER=redis python3 -m app.cli.commands query-image data/images/000000023272.jpg --top-k 3
 ```
 
 Expected behavior:
 
 - `upload` prints an `image.submitted` event
 - `query` prints a `query.completed` event
+- `query-image` prints an `image.query_completed` event
 - the returned results include the uploaded image with a similarity score
 
 Example result:

@@ -1,6 +1,12 @@
 from app.broker.in_memory_broker import InMemoryBroker
 from app.events.factory import create_event
-from app.events.topics import QUERY_COMPLETED, QUERY_SUBMITTED, SYSTEM_ERROR
+from app.events.topics import (
+    IMAGE_QUERY_COMPLETED,
+    IMAGE_QUERY_SUBMITTED,
+    QUERY_COMPLETED,
+    QUERY_SUBMITTED,
+    SYSTEM_ERROR,
+)
 from app.services.query_service import QueryService
 from app.storage.processed_event_store import ProcessedEventStore
 from app.storage.vector_store import VectorStore
@@ -154,3 +160,82 @@ def test_query_service_returns_empty_results_when_store_is_empty():
 
     assert len(completed_queries) == 1
     assert completed_queries[0]["payload"]["results"] == []
+
+
+def test_query_service_supports_image_to_image_similarity_query():
+    broker = InMemoryBroker()
+    vector_store = VectorStore()
+    processed_store = ProcessedEventStore()
+
+    vector_store.add("img_cat_1", [1.0, 1.0, 0.0, 2.0])
+    vector_store.add("img_cat_2", [1.0, 0.95, 0.0, 2.0])
+    vector_store.add("img_person_1", [1.0, 0.2, 0.0, 1.0])
+
+    service = QueryService(
+        broker,
+        vector_store,
+        processed_store,
+    )
+
+    completed_queries = []
+
+    def completed_handler(event: dict) -> None:
+        completed_queries.append(event)
+
+    broker.subscribe(IMAGE_QUERY_COMPLETED, completed_handler)
+    service.start()
+
+    query_event = create_event(
+        IMAGE_QUERY_SUBMITTED,
+        {
+            "query_id": "iq_8001",
+            "image_id": "img_cat_1",
+            "top_k": 2,
+        },
+        source="test",
+    ).model_dump(mode="json")
+
+    broker.publish(IMAGE_QUERY_SUBMITTED, query_event)
+
+    assert len(completed_queries) == 1
+    completed_event = completed_queries[0]
+
+    assert completed_event["metadata"]["event_type"] == IMAGE_QUERY_COMPLETED
+    assert completed_event["payload"]["query_id"] == "iq_8001"
+    assert completed_event["payload"]["results"][0]["image_id"] == "img_cat_1"
+    assert completed_event["payload"]["results"][1]["image_id"] == "img_cat_2"
+
+
+def test_query_service_publishes_error_for_missing_image_embedding():
+    broker = InMemoryBroker()
+    vector_store = VectorStore()
+    processed_store = ProcessedEventStore()
+
+    service = QueryService(
+        broker,
+        vector_store,
+        processed_store,
+    )
+
+    system_errors = []
+
+    def error_handler(event: dict) -> None:
+        system_errors.append(event)
+
+    broker.subscribe(SYSTEM_ERROR, error_handler)
+    service.start()
+
+    query_event = create_event(
+        IMAGE_QUERY_SUBMITTED,
+        {
+            "query_id": "iq_missing",
+            "image_id": "img_missing",
+            "top_k": 2,
+        },
+        source="test",
+    ).model_dump(mode="json")
+
+    broker.publish(IMAGE_QUERY_SUBMITTED, query_event)
+
+    assert len(system_errors) == 1
+    assert system_errors[0]["metadata"]["event_type"] == SYSTEM_ERROR

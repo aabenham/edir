@@ -4,6 +4,8 @@ ANNOTATION_STORED = "annotation.stored"
 EMBEDDING_CREATED = "embedding.created"
 QUERY_SUBMITTED = "query.submitted"
 QUERY_COMPLETED = "query.completed"
+IMAGE_QUERY_SUBMITTED = "image.query_submitted"
+IMAGE_QUERY_COMPLETED = "image.query_completed"
 ANNOTATION_CORRECTED = "annotation.corrected"
 SYSTEM_ERROR = "system.error"
 
@@ -14,6 +16,8 @@ ALL_TOPICS = {
     EMBEDDING_CREATED,
     QUERY_SUBMITTED,
     QUERY_COMPLETED,
+    IMAGE_QUERY_SUBMITTED,
+    IMAGE_QUERY_COMPLETED,
     ANNOTATION_CORRECTED,
     SYSTEM_ERROR,
 }
