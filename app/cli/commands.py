@@ -1,10 +1,16 @@
 import argparse
 import json
+from pathlib import Path
 from uuid import uuid4
 
 from app.config import AppConfig
 from app.events.factory import create_event
-from app.events.topics import QUERY_COMPLETED, QUERY_SUBMITTED
+from app.events.topics import (
+    IMAGE_QUERY_COMPLETED,
+    IMAGE_QUERY_SUBMITTED,
+    QUERY_COMPLETED,
+    QUERY_SUBMITTED,
+)
 from app.main import build_application
 from app.services.image_service import ImageService
 
@@ -24,6 +30,15 @@ def build_parser() -> argparse.ArgumentParser:
     query_parser.add_argument("--top-k", type=int, default=3)
     query_parser.add_argument("--source", default="cli")
     query_parser.add_argument("--timeout", type=float, default=5.0)
+
+    image_query_parser = subparsers.add_parser(
+        "query-image",
+        help="Run an image-to-image similarity query using a stored image embedding",
+    )
+    image_query_parser.add_argument("image_path")
+    image_query_parser.add_argument("--top-k", type=int, default=3)
+    image_query_parser.add_argument("--source", default="cli")
+    image_query_parser.add_argument("--timeout", type=float, default=5.0)
 
     paths_parser = subparsers.add_parser("paths", help="Show configured data paths")
     paths_parser.add_argument("--json", action="store_true")
@@ -106,6 +121,46 @@ def main() -> int:
                 raise TimeoutError(
                     f"Timed out waiting {args.timeout} seconds for query.completed"
                 )
+
+            if args.command == "query-image":
+                image_id = Path(args.image_path).stem
+                query_id = f"imgqry_{uuid4().hex[:8]}"
+                client = redis.Redis(
+                    host=config.redis_host,
+                    port=config.redis_port,
+                    db=config.redis_db,
+                    decode_responses=True,
+                )
+                pubsub = client.pubsub()
+                pubsub.subscribe(IMAGE_QUERY_COMPLETED)
+
+                event = create_event(
+                    IMAGE_QUERY_SUBMITTED,
+                    {
+                        "query_id": query_id,
+                        "image_id": image_id,
+                        "top_k": args.top_k,
+                    },
+                    source=args.source,
+                ).model_dump(mode="json")
+                broker.publish(IMAGE_QUERY_SUBMITTED, event)
+
+                try:
+                    response = pubsub.get_message(timeout=args.timeout)
+                    while response:
+                        if response["type"] == "message":
+                            payload = json.loads(response["data"])
+                            if payload["payload"].get("query_id") == query_id:
+                                print(json.dumps(payload, indent=2))
+                                return 0
+                        response = pubsub.get_message(timeout=args.timeout)
+                finally:
+                    pubsub.close()
+                    client.close()
+
+                raise TimeoutError(
+                    f"Timed out waiting {args.timeout} seconds for image.query_completed"
+                )
         finally:
             broker.close()
 
@@ -125,6 +180,20 @@ def main() -> int:
             )
             print(json.dumps(result, indent=2))
             return 0
+
+        if args.command == "query-image":
+            image_path = Path(args.image_path)
+            image_id = image_path.stem
+            if app.vector_store.get(image_id) is None:
+                app.submit_image(str(image_path), source=args.source)
+
+            result = app.submit_image_query(
+                image_id,
+                top_k=args.top_k,
+                source=args.source,
+            )
+            print(json.dumps(result, indent=2))
+            return 0
     finally:
         app.close()
 
@@ -134,4 +203,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
