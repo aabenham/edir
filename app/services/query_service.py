@@ -18,14 +18,18 @@ class QueryService:
         broker: BaseBroker,
         vector_store: VectorStore,
         processed_event_store: ProcessedEventStore,
+        mode: str = "both",
     ) -> None:
         self.broker = broker
         self.vector_store = vector_store
         self.processed_event_store = processed_event_store
+        self.mode = mode
 
     def start(self) -> None:
-        self.broker.subscribe(QUERY_SUBMITTED, self.handle_query_submitted)
-        self.broker.subscribe(IMAGE_QUERY_SUBMITTED, self.handle_image_query_submitted)
+        if self.mode in {"both", "text"}:
+            self.broker.subscribe(QUERY_SUBMITTED, self.handle_query_submitted)
+        if self.mode in {"both", "image"}:
+            self.broker.subscribe(IMAGE_QUERY_SUBMITTED, self.handle_image_query_submitted)
 
     def handle_query_submitted(self, event: dict) -> None:
         if not validate_event_for_topic(QUERY_SUBMITTED, event):

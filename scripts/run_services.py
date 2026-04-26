@@ -46,6 +46,13 @@ def run_redis_services(config: AppConfig) -> None:
             RedisBroker(config.redis_host, config.redis_port, config.redis_db),
             vector_store,
             ProcessedEventStore(),
+            mode="text",
+        ),
+        QueryService(
+            RedisBroker(config.redis_host, config.redis_port, config.redis_db),
+            vector_store,
+            ProcessedEventStore(),
+            mode="image",
         ),
     ]
 
