@@ -84,7 +84,7 @@ Key paths:
 Create and activate a virtual environment:
 
 ```bash
-cd /Users/anasbenhamida/Desktop/EC530/edir
+cd edir
 python3 -m venv .venv
 source .venv/bin/activate
 ```
@@ -232,7 +232,7 @@ PONG
 ### Terminal 1: start the workers
 
 ```bash
-cd /Users/anasbenhamida/Desktop/EC530/edir
+cd edir
 source .venv/bin/activate
 APP_BROKER=redis python3 scripts/run_services.py --broker redis
 ```
@@ -241,14 +241,14 @@ Expected output:
 
 ```text
 Broker: redis
-Annotations: /Users/anasbenhamida/Desktop/EC530/edir/data/annotations/simulated_annotations.json
+Annotations: <project-root>/data/annotations/simulated_annotations.json
 Redis-backed service listeners are running.
 ```
 
 ### Terminal 2: upload and query
 
 ```bash
-cd /Users/anasbenhamida/Desktop/EC530/edir
+cd edir
 source .venv/bin/activate
 APP_BROKER=redis python3 -m app.cli.commands upload data/images/000000023272.jpg
 APP_BROKER=redis python3 -m app.cli.commands query "cat" --top-k 3
