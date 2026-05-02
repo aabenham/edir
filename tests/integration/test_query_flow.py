@@ -81,7 +81,8 @@ def test_end_to_end_annotation_embedding_and_query_flow():
 
     stored_vector = vector_store.get("img_pipeline_1")
     assert stored_vector is not None
-    assert len(stored_vector) == 4
+    assert len(stored_vector) == 2
+    assert stored_vector == [37.9652, -102.9368]
 
     assert len(embedding_events) == 1
     assert embedding_events[0]["payload"]["image_id"] == "img_pipeline_1"

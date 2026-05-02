@@ -17,9 +17,9 @@ def test_query_service_searches_vectors_and_publishes_query_completed():
     vector_store = VectorStore()
     processed_store = ProcessedEventStore()
 
-    vector_store.add("img_car_1", [2.0, 0.90, 0.0, 2.0])
-    vector_store.add("img_truck_1", [1.0, 0.95, 0.0, 2.0])
-    vector_store.add("img_random_1", [0.0, 0.10, 0.0, 1.0])
+    vector_store.add("img_car_1", [34.0522, -118.2437])
+    vector_store.add("img_truck_1", [29.7604, -95.3698])
+    vector_store.add("img_random_1", [42.3601, -71.0589])
 
     service = QueryService(
         broker,
@@ -61,7 +61,7 @@ def test_query_service_ignores_duplicate_events():
     vector_store = VectorStore()
     processed_store = ProcessedEventStore()
 
-    vector_store.add("img_car_2", [2.0, 0.88, 0.0, 2.0])
+    vector_store.add("img_car_2", [34.0522, -118.2437])
 
     service = QueryService(
         broker,
@@ -167,9 +167,9 @@ def test_query_service_supports_image_to_image_similarity_query():
     vector_store = VectorStore()
     processed_store = ProcessedEventStore()
 
-    vector_store.add("img_cat_1", [1.0, 1.0, 0.0, 2.0])
-    vector_store.add("img_cat_2", [1.0, 0.95, 0.0, 2.0])
-    vector_store.add("img_person_1", [1.0, 0.2, 0.0, 1.0])
+    vector_store.add("img_cat_1", [42.3601, -71.0589])
+    vector_store.add("img_cat_2", [42.3610, -71.0575])
+    vector_store.add("img_person_1", [41.8781, -87.6298])
 
     service = QueryService(
         broker,

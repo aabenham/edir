@@ -66,4 +66,5 @@ def test_upload_flow_runs_end_to_end_from_image_submission(tmp_path: Path):
 
     vector = app.vector_store.get("cat_101")
     assert vector is not None
-    assert len(vector) == 4
+    assert len(vector) == 2
+    assert vector == [42.3601, -71.0589]

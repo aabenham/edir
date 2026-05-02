@@ -56,8 +56,8 @@ def test_embedding_service_creates_vector_and_publishes_embedding_created():
     stored_vector = vector_store.get("img_6001")
 
     assert stored_vector is not None
-    assert len(stored_vector) == 4
-    assert stored_vector[0] == 2.0
+    assert len(stored_vector) == 2
+    assert stored_vector == [37.9652, -102.9368]
 
     assert len(published_embeddings) == 1
     assert published_embeddings[0]["metadata"]["event_type"] == EMBEDDING_CREATED
@@ -111,6 +111,7 @@ def test_embedding_service_ignores_duplicate_events():
     assert vector_store.count() == 1
     assert processed_store.count() == 1
     assert len(published_embeddings) == 1
+    assert vector_store.get("img_6002") == [29.7604, -95.3698]
 
 
 def test_embedding_service_publishes_error_when_document_missing():

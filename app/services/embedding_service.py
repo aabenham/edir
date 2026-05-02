@@ -6,6 +6,15 @@ from app.storage.document_store import DocumentStoreProtocol
 from app.storage.processed_event_store import ProcessedEventStore
 from app.storage.vector_store import VectorStore
 
+CITY_EMBEDDING_CENTERS = {
+    "cat": [42.3601, -71.0589],      # Boston
+    "dog": [40.7128, -74.0060],      # New York
+    "person": [41.8781, -87.6298],   # Chicago
+    "car": [34.0522, -118.2437],     # Los Angeles
+    "truck": [29.7604, -95.3698],    # Houston
+}
+DEFAULT_EMBEDDING_CENTER = [39.8283, -98.5795]  # geographic center of the contiguous US
+
 
 class EmbeddingService:
     def __init__(
@@ -74,18 +83,15 @@ class EmbeddingService:
 
     def _generate_mock_embedding(self, document: dict) -> list[float]:
         objects = document.get("objects", [])
-        object_count = len(objects)
-        avg_confidence = (
-            sum(obj.get("confidence", 0.0) for obj in objects) / object_count
-            if object_count > 0
-            else 0.0
-        )
-        has_review = 1.0 if "review" in document else 0.0
-        history_length = float(len(document.get("history", [])))
-
-        return [
-            float(object_count),
-            round(avg_confidence, 4),
-            has_review,
-            history_length,
+        coordinates = [
+            CITY_EMBEDDING_CENTERS[obj.get("label", "").lower()]
+            for obj in objects
+            if obj.get("label", "").lower() in CITY_EMBEDDING_CENTERS
         ]
+
+        if not coordinates:
+            return DEFAULT_EMBEDDING_CENTER.copy()
+
+        avg_lat = sum(point[0] for point in coordinates) / len(coordinates)
+        avg_lon = sum(point[1] for point in coordinates) / len(coordinates)
+        return [round(avg_lat, 4), round(avg_lon, 4)]

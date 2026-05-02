@@ -11,6 +11,15 @@ from app.events.validator import validate_event_for_topic
 from app.storage.processed_event_store import ProcessedEventStore
 from app.storage.vector_store import VectorStore
 
+QUERY_EMBEDDING_CENTERS = {
+    "cat": [42.3601, -71.0589],      # Boston
+    "dog": [40.7128, -74.0060],      # New York
+    "person": [41.8781, -87.6298],   # Chicago
+    "car": [34.0522, -118.2437],     # Los Angeles
+    "truck": [29.7604, -95.3698],    # Houston
+}
+DEFAULT_QUERY_EMBEDDING = [39.8283, -98.5795]
+
 
 class QueryService:
     def __init__(
@@ -125,11 +134,8 @@ class QueryService:
     def _generate_mock_query_embedding(self, query_text: str) -> list[float]:
         text = query_text.lower()
 
-        if "car" in text:
-            return [2.0, 0.85, 0.0, 2.0]
-        if "truck" in text:
-            return [1.0, 0.95, 0.0, 2.0]
-        if "person" in text:
-            return [1.0, 0.80, 0.0, 2.0]
+        for label, coordinates in QUERY_EMBEDDING_CENTERS.items():
+            if label in text:
+                return coordinates.copy()
 
-        return [1.0, 0.50, 0.0, 1.0]
+        return DEFAULT_QUERY_EMBEDDING.copy()
