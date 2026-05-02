@@ -16,7 +16,8 @@ from app.services.embedding_service import EmbeddingService
 from app.services.image_service import ImageService
 from app.services.inference_service import InferenceService
 from app.services.query_service import QueryService
-from app.storage.document_store import DocumentStore
+from app.storage.document_store import DocumentStore, DocumentStoreProtocol
+from app.storage.mongo_document_store import MongoDocumentStore
 from app.storage.processed_event_store import ProcessedEventStore
 from app.storage.vector_store import VectorStore
 
@@ -30,7 +31,7 @@ class Application:
     document_service: DocumentService
     embedding_service: EmbeddingService
     query_service: QueryService
-    document_store: DocumentStore
+    document_store: DocumentStoreProtocol
     vector_store: VectorStore
 
     def start(self) -> "Application":
@@ -86,6 +87,7 @@ class Application:
         return responses[-1] if responses else {}
 
     def close(self) -> None:
+        self.document_store.close()
         self.broker.close()
 
 
@@ -97,9 +99,21 @@ def build_broker(config: AppConfig) -> BaseBroker:
             host=config.redis_host,
             port=config.redis_port,
             db=config.redis_db,
+            url=config.redis_url,
         )
 
     return InMemoryBroker()
+
+
+def build_document_store(config: AppConfig) -> DocumentStoreProtocol:
+    if config.document_store_backend == "mongodb":
+        return MongoDocumentStore(
+            mongo_uri=config.mongo_uri,
+            database_name=config.mongo_database,
+            collection_name=config.mongo_collection,
+        )
+
+    return DocumentStore()
 
 
 def build_application(config: AppConfig | None = None) -> Application:
@@ -107,7 +121,7 @@ def build_application(config: AppConfig | None = None) -> Application:
     resolved_config.ensure_data_dirs()
 
     broker = build_broker(resolved_config)
-    document_store = DocumentStore()
+    document_store = build_document_store(resolved_config)
     vector_store = VectorStore()
 
     return Application(

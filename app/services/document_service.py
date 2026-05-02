@@ -2,7 +2,7 @@ from app.broker.base import BaseBroker
 from app.events.factory import create_event
 from app.events.topics import ANNOTATION_STORED, INFERENCE_COMPLETED, SYSTEM_ERROR
 from app.events.validator import validate_event_for_topic
-from app.storage.document_store import DocumentStore
+from app.storage.document_store import DocumentStoreProtocol
 from app.storage.processed_event_store import ProcessedEventStore
 
 
@@ -10,7 +10,7 @@ class DocumentService:
     def __init__(
         self,
         broker: BaseBroker,
-        document_store: DocumentStore,
+        document_store: DocumentStoreProtocol,
         processed_event_store: ProcessedEventStore,
     ) -> None:
         self.broker = broker

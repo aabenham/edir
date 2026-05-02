@@ -8,7 +8,7 @@ The system simulates an image-processing pipeline:
 2. simulated inference produces object annotations
 3. annotations are stored as a document
 4. an embedding is generated and indexed
-5. a natural-language query retrieves matching images
+5. a natural-language or image-based query retrieves matching images
 
 The project uses a small filtered COCO subset for realistic image and annotation data, while keeping inference deterministic by converting the dataset into a local JSON format.
 
@@ -41,9 +41,11 @@ Infrastructure:
 - `app/broker/in_memory_broker.py`
   Fast, synchronous broker used in tests and simple local runs.
 - `app/broker/redis_broker.py`
-  Redis-backed broker for the full local demo.
+  Redis-backed broker for local or hosted Redis deployments.
 - `app/storage/document_store.py`
   In-memory document store.
+- `app/storage/mongo_document_store.py`
+  MongoDB-backed document store for local or hosted MongoDB deployments.
 - `app/storage/vector_store.py`
   In-memory vector store with cosine similarity search.
 - `app/storage/processed_event_store.py`
@@ -59,6 +61,7 @@ This project is designed to demonstrate:
 - fault-oriented testing
 - document-style annotation storage
 - vector-based image retrieval
+- cloud-configurable service integrations
 
 The project intentionally does not train models or implement advanced ANN search. The focus is on architecture and system integration.
 
@@ -95,6 +98,44 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
+## Configuration
+
+The project supports both local and cloud-style backends through environment variables.
+
+### Broker configuration
+
+- `APP_BROKER=inmemory`
+  Use the in-memory broker for tests and quick local runs.
+- `APP_BROKER=redis`
+  Use Redis pub-sub.
+
+Redis connection options:
+
+- `REDIS_URL`
+  Full hosted Redis connection string. If set, it takes precedence over host/port/db.
+- `REDIS_HOST`
+  Redis host for local or self-managed Redis.
+- `REDIS_PORT`
+  Redis port.
+- `REDIS_DB`
+  Redis database number.
+
+### Document store configuration
+
+- `APP_DOCUMENT_STORE=inmemory`
+  Use the in-memory document store.
+- `APP_DOCUMENT_STORE=mongodb`
+  Use MongoDB as the document store.
+
+MongoDB connection options:
+
+- `MONGO_URI`
+  MongoDB connection string.
+- `MONGO_DATABASE`
+  Database name.
+- `MONGO_COLLECTION`
+  Collection name for annotation documents.
+
 ## Running Tests and Lint
 
 Run the full test suite:
@@ -111,7 +152,7 @@ ruff check .
 
 At the time of final verification:
 
-- `45` tests pass
+- `48` tests pass
 - `ruff check .` passes
 
 ## Dataset Preparation
@@ -214,7 +255,7 @@ Expected behavior:
 
 ## Redis Demo
 
-This project also supports a Redis-backed local demo.
+This project supports a Redis-backed local demo and can also be configured for hosted Redis by setting `REDIS_URL`.
 
 Start Redis:
 
@@ -296,6 +337,8 @@ The tests cover several system guarantees:
 ## Notes
 
 - The project supports both `inmemory` and `redis` broker modes.
-- The Redis path is intended for the final local demo.
+- The document store supports both `inmemory` and `mongodb` backends.
+- The Redis path can be used locally or pointed at a hosted Redis deployment.
+- The MongoDB document store can be pointed at a local instance or a hosted MongoDB deployment.
 - The COCO subset is intentionally capped to keep the project small and deterministic.
 - Generated local data is not required to be committed if the scripts can reproduce it.

@@ -2,7 +2,7 @@ from app.broker.base import BaseBroker
 from app.events.factory import create_event
 from app.events.topics import ANNOTATION_STORED, EMBEDDING_CREATED, SYSTEM_ERROR
 from app.events.validator import validate_event_for_topic
-from app.storage.document_store import DocumentStore
+from app.storage.document_store import DocumentStoreProtocol
 from app.storage.processed_event_store import ProcessedEventStore
 from app.storage.vector_store import VectorStore
 
@@ -11,7 +11,7 @@ class EmbeddingService:
     def __init__(
         self,
         broker: BaseBroker,
-        document_store: DocumentStore,
+        document_store: DocumentStoreProtocol,
         vector_store: VectorStore,
         processed_event_store: ProcessedEventStore,
     ) -> None:

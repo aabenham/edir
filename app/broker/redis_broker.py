@@ -7,8 +7,18 @@ from app.broker.base import BaseBroker
 
 
 class RedisBroker(BaseBroker):
-    def __init__(self, host: str = "localhost", port: int = 6379, db: int = 0) -> None:
-        self._client = redis.Redis(host=host, port=port, db=db, decode_responses=True)
+    def __init__(
+        self,
+        host: str = "localhost",
+        port: int = 6379,
+        db: int = 0,
+        url: str | None = None,
+    ) -> None:
+        self._client = (
+            redis.from_url(url, decode_responses=True)
+            if url
+            else redis.Redis(host=host, port=port, db=db, decode_responses=True)
+        )
         self._pubsub = self._client.pubsub()
 
     def publish(self, topic: str, event: dict) -> None:

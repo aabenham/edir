@@ -37,9 +37,14 @@ def test_upload_flow_runs_end_to_end_from_image_submission(tmp_path: Path):
     config = AppConfig(
         root_dir=tmp_path,
         broker_backend="inmemory",
+        redis_url=None,
         redis_host="localhost",
         redis_port=6379,
         redis_db=0,
+        document_store_backend="inmemory",
+        mongo_uri="mongodb://localhost:27017",
+        mongo_database="image_retrieval",
+        mongo_collection="documents",
         data_dir=data_dir,
         images_dir=images_dir,
         annotations_path=annotations_path,
@@ -62,4 +67,3 @@ def test_upload_flow_runs_end_to_end_from_image_submission(tmp_path: Path):
     vector = app.vector_store.get("cat_101")
     assert vector is not None
     assert len(vector) == 4
-

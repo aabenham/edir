@@ -7,9 +7,14 @@ from pathlib import Path
 class AppConfig:
     root_dir: Path
     broker_backend: str
+    redis_url: str | None
     redis_host: str
     redis_port: int
     redis_db: int
+    document_store_backend: str
+    mongo_uri: str
+    mongo_database: str
+    mongo_collection: str
     data_dir: Path
     images_dir: Path
     annotations_path: Path
@@ -30,9 +35,14 @@ class AppConfig:
         return cls(
             root_dir=resolved_root,
             broker_backend=os.getenv("APP_BROKER", "inmemory").lower(),
+            redis_url=os.getenv("REDIS_URL"),
             redis_host=os.getenv("REDIS_HOST", "localhost"),
             redis_port=int(os.getenv("REDIS_PORT", "6379")),
             redis_db=int(os.getenv("REDIS_DB", "0")),
+            document_store_backend=os.getenv("APP_DOCUMENT_STORE", "inmemory").lower(),
+            mongo_uri=os.getenv("MONGO_URI", "mongodb://localhost:27017"),
+            mongo_database=os.getenv("MONGO_DATABASE", "image_retrieval"),
+            mongo_collection=os.getenv("MONGO_COLLECTION", "documents"),
             data_dir=data_dir,
             images_dir=images_dir,
             annotations_path=annotations_path,

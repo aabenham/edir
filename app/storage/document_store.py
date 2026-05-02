@@ -1,3 +1,26 @@
+from typing import Protocol
+
+
+class DocumentStoreProtocol(Protocol):
+    def save(self, image_id: str, document: dict) -> None:
+        ...
+
+    def get(self, image_id: str) -> dict | None:
+        ...
+
+    def all(self) -> dict[str, dict]:
+        ...
+
+    def count(self) -> int:
+        ...
+
+    def clear(self) -> None:
+        ...
+
+    def close(self) -> None:
+        ...
+
+
 class DocumentStore:
     def __init__(self) -> None:
         self._documents: dict[str, dict] = {}
@@ -16,3 +39,6 @@ class DocumentStore:
 
     def clear(self) -> None:
         self._documents.clear()
+
+    def close(self) -> None:
+        return None
