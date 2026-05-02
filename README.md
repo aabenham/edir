@@ -48,6 +48,8 @@ Infrastructure:
   MongoDB-backed document store for local or hosted MongoDB deployments.
 - `app/storage/vector_store.py`
   In-memory vector store with cosine similarity search.
+- `app/storage/faiss_vector_store.py`
+  FAISS-backed vector store for nearest-neighbor search over synthetic embeddings.
 - `app/storage/processed_event_store.py`
   Tracks processed event IDs for idempotency.
 
@@ -136,6 +138,13 @@ MongoDB connection options:
 - `MONGO_COLLECTION`
   Collection name for annotation documents.
 
+### Vector store configuration
+
+- `APP_VECTOR_STORE=inmemory`
+  Use the in-memory vector store.
+- `APP_VECTOR_STORE=faiss`
+  Use a FAISS-backed vector store.
+
 ## Running Tests and Lint
 
 Run the full test suite:
@@ -214,6 +223,20 @@ Run an image-to-image query:
 ```bash
 python3 -m app.cli.commands query-image data/images/000000023272.jpg --top-k 3
 ```
+
+## Embedding Simulation
+
+The project uses synthetic coordinate embeddings to simulate semantic similarity.
+
+Example label centers:
+
+- `cat` -> Boston
+- `dog` -> New York
+- `person` -> Chicago
+- `car` -> Los Angeles
+- `truck` -> Houston
+
+Each image embedding is a 2D coordinate generated from its detected object labels. This matches the project’s goal of simulating embeddings without training a model.
 
 ## In-Memory Demo
 
@@ -338,6 +361,7 @@ The tests cover several system guarantees:
 
 - The project supports both `inmemory` and `redis` broker modes.
 - The document store supports both `inmemory` and `mongodb` backends.
+- The vector store supports both `inmemory` and `faiss` backends.
 - The Redis path can be used locally or pointed at a hosted Redis deployment.
 - The MongoDB document store can be pointed at a local instance or a hosted MongoDB deployment.
 - The COCO subset is intentionally capped to keep the project small and deterministic.

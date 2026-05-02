@@ -1,4 +1,25 @@
 import math
+from typing import Protocol
+
+
+class VectorStoreProtocol(Protocol):
+    def add(self, image_id: str, vector: list[float]) -> None:
+        ...
+
+    def get(self, image_id: str) -> list[float] | None:
+        ...
+
+    def count(self) -> int:
+        ...
+
+    def clear(self) -> None:
+        ...
+
+    def search(self, query_vector: list[float], top_k: int = 3) -> list[dict]:
+        ...
+
+    def close(self) -> None:
+        ...
 
 
 class VectorStore:
@@ -26,6 +47,9 @@ class VectorStore:
 
         scored.sort(key=lambda item: item["score"], reverse=True)
         return scored[:top_k]
+
+    def close(self) -> None:
+        return None
 
     def _cosine_similarity(self, a: list[float], b: list[float]) -> float:
         if len(a) != len(b):

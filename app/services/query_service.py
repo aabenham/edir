@@ -9,7 +9,7 @@ from app.events.topics import (
 )
 from app.events.validator import validate_event_for_topic
 from app.storage.processed_event_store import ProcessedEventStore
-from app.storage.vector_store import VectorStore
+from app.storage.vector_store import VectorStoreProtocol
 
 QUERY_EMBEDDING_CENTERS = {
     "cat": [42.3601, -71.0589],      # Boston
@@ -25,7 +25,7 @@ class QueryService:
     def __init__(
         self,
         broker: BaseBroker,
-        vector_store: VectorStore,
+        vector_store: VectorStoreProtocol,
         processed_event_store: ProcessedEventStore,
         mode: str = "both",
     ) -> None:

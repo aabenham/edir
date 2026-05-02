@@ -15,6 +15,7 @@ class AppConfig:
     mongo_uri: str
     mongo_database: str
     mongo_collection: str
+    vector_store_backend: str
     data_dir: Path
     images_dir: Path
     annotations_path: Path
@@ -43,6 +44,7 @@ class AppConfig:
             mongo_uri=os.getenv("MONGO_URI", "mongodb://localhost:27017"),
             mongo_database=os.getenv("MONGO_DATABASE", "image_retrieval"),
             mongo_collection=os.getenv("MONGO_COLLECTION", "documents"),
+            vector_store_backend=os.getenv("APP_VECTOR_STORE", "inmemory").lower(),
             data_dir=data_dir,
             images_dir=images_dir,
             annotations_path=annotations_path,

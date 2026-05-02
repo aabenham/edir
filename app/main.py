@@ -17,9 +17,10 @@ from app.services.image_service import ImageService
 from app.services.inference_service import InferenceService
 from app.services.query_service import QueryService
 from app.storage.document_store import DocumentStore, DocumentStoreProtocol
+from app.storage.faiss_vector_store import FaissVectorStore
 from app.storage.mongo_document_store import MongoDocumentStore
 from app.storage.processed_event_store import ProcessedEventStore
-from app.storage.vector_store import VectorStore
+from app.storage.vector_store import VectorStore, VectorStoreProtocol
 
 
 @dataclass
@@ -32,7 +33,7 @@ class Application:
     embedding_service: EmbeddingService
     query_service: QueryService
     document_store: DocumentStoreProtocol
-    vector_store: VectorStore
+    vector_store: VectorStoreProtocol
 
     def start(self) -> "Application":
         self.inference_service.start()
@@ -88,6 +89,7 @@ class Application:
 
     def close(self) -> None:
         self.document_store.close()
+        self.vector_store.close()
         self.broker.close()
 
 
@@ -116,13 +118,20 @@ def build_document_store(config: AppConfig) -> DocumentStoreProtocol:
     return DocumentStore()
 
 
+def build_vector_store(config: AppConfig) -> VectorStoreProtocol:
+    if config.vector_store_backend == "faiss":
+        return FaissVectorStore()
+
+    return VectorStore()
+
+
 def build_application(config: AppConfig | None = None) -> Application:
     resolved_config = config or AppConfig.from_env()
     resolved_config.ensure_data_dirs()
 
     broker = build_broker(resolved_config)
     document_store = build_document_store(resolved_config)
-    vector_store = VectorStore()
+    vector_store = build_vector_store(resolved_config)
 
     return Application(
         config=resolved_config,

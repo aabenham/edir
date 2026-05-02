@@ -45,6 +45,7 @@ def test_upload_flow_runs_end_to_end_from_image_submission(tmp_path: Path):
         mongo_uri="mongodb://localhost:27017",
         mongo_database="image_retrieval",
         mongo_collection="documents",
+        vector_store_backend="inmemory",
         data_dir=data_dir,
         images_dir=images_dir,
         annotations_path=annotations_path,

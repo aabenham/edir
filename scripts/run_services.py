@@ -101,6 +101,7 @@ def main() -> int:
             mongo_uri=config.mongo_uri,
             mongo_database=config.mongo_database,
             mongo_collection=config.mongo_collection,
+            vector_store_backend=config.vector_store_backend,
             data_dir=config.data_dir,
             images_dir=config.images_dir,
             annotations_path=config.annotations_path,
